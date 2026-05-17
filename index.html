@@ -375,23 +375,23 @@
 
     <fieldset id="bloc-candidature" style="display:none">
       <legend>Première candidature · présente-toi</legend>
-      <p style="color:rgba(255,255,255,0.75);font-size:14px;margin:0 0 14px">Cédric et Joshué reçoivent ta candidature et décident d'une date. Plus le dossier est complet, plus tu mets toutes les chances de ton côté.</p>
+      <p style="color:rgba(255,255,255,0.75);font-size:14px;margin:0 0 14px">Cédric et Joshué reçoivent ta candidature et te recontactent pour caler ton créneau sur la prochaine rotation libre (cycle 4 semaines, accrochage le dimanche). Plus ton dossier est rodé, plus on a envie de t'accrocher.</p>
       <div class="deux-cols">
         <div>
-          <label for="nom_artiste_cand">Nom artiste / groupe *</label>
-          <input type="text" id="nom_artiste_cand" placeholder="Ex : Trio Choro de Quintal" required>
+          <label for="nom_artiste_cand">Nom artiste / collectif *</label>
+          <input type="text" id="nom_artiste_cand" placeholder="Ex : Carole Lévesque · Atelier Bleu Marine" required>
         </div>
         <div>
           <label for="courriel_cand">Courriel *</label>
           <input type="email" id="courriel_cand" placeholder="contact@exemple.com" required>
         </div>
       </div>
-      <label for="date_souhaitee_cand">Date(s) souhaitée(s) <span class="opt">(libre — on regarde ce qui matche)</span></label>
-      <input type="text" id="date_souhaitee_cand" placeholder="Ex : un vendredi de juin, ou « peu importe »">
+      <label for="date_souhaitee_cand">Période souhaitée <span class="opt">(facultatif — on cale sur la prochaine rotation 4 sem libre)</span></label>
+      <input type="text" id="date_souhaitee_cand" placeholder="Ex : à partir de juin · automne · peu importe">
     </fieldset>
 
     <fieldset>
-      <legend>Toi (ou votre collectif)</legend>
+      <legend>Ton travail · ton univers</legend>
 
       <label for="bio">Bio courte <span class="opt">(4 à 8 lignes — parcours, ton univers, ce qui se joue dans ton travail)</span></label>
       <textarea id="bio" placeholder="Ex : Peintre figurative basée à Montréal, je travaille la couleur saturée sur grand format depuis 2018..."></textarea>
@@ -420,15 +420,15 @@
 
       <div class="deux-cols">
         <div>
-          <label for="cellulaire">Cellulaire <span class="opt">(pour te joindre le jour du show)</span></label>
+          <label for="cellulaire">Cellulaire <span class="opt">(pour la logistique d'accrochage/décrochage)</span></label>
           <input type="tel" id="cellulaire" placeholder="514 555 1234">
         </div>
         <div>
-          <label>Photo principale <span class="opt">(format carré ou portrait, JPG/PNG)</span></label>
+          <label>Portrait de toi <span class="opt">(facultatif — on l'utilise pour la promo si tu nous donnes le feu vert)</span></label>
           <div class="dropzone-artiste" id="dropzone-artiste">
             <div class="icone">📷</div>
             <div class="label-zone">Glisser ou cliquer</div>
-            <div class="hint">Max 10 Mo</div>
+            <div class="hint">JPG/PNG · max 10 Mo · format libre</div>
             <img id="apercu-artiste" style="display:none">
             <input type="file" id="photo-artiste-input" accept="image/*">
           </div>
@@ -437,9 +437,9 @@
     </fieldset>
 
     <fieldset>
-      <legend>Liens (EPK)</legend>
+      <legend>Tes traces en ligne</legend>
       <div class="info-batch">
-        Colle ici tous les liens utiles à ta promo et à l'écoute. Au moins 1 lien audio est fortement recommandé pour qu'on puisse découvrir ton univers.
+        Donne-nous au moins un lien pour qu'on puisse aller voir ton portfolio. Instagram suffit souvent, mais un site dédié ou une page Facebook artiste sont les bienvenus.
       </div>
       <div class="liens-grille">
         <div class="lien-bloc">
@@ -564,19 +564,22 @@
         modeCandidature = true;
         chargement.style.display = 'none';
         document.getElementById('app-charge').style.display = 'block';
-        document.getElementById('accueil-titre').textContent = 'Bienvenue 🐝';
-        document.getElementById('accueil-p1').innerHTML = "<strong style=\"color:var(--jaune)\">Tu veux exposer sur nos murs ?</strong> Remplis ce formulaire — c'est ton premier filtre. Plus on voit ton univers, plus on a envie de t'accrocher.";
-        document.getElementById('accueil-p2').textContent = "Cédric et Joshué te reviennent rapidement avec un créneau d'installation proposé.";
+        document.getElementById('accueil-titre').innerHTML = 'Salut <span id="nom-artiste-accueil">…</span> 🐝';
+        document.getElementById('accueil-p1').innerHTML = "<strong style=\"color:var(--jaune)\">Tu veux exposer sur nos murs ?</strong> Remplis ce formulaire — c'est ton premier filtre. Plus on voit ton univers (photos d'œuvres, technique, bio), plus on a envie de t'accrocher.";
+        document.getElementById('accueil-p2').textContent = "Cédric et Joshué te reviennent rapidement pour caler ton créneau sur la prochaine rotation 4 semaines libre.";
         // Pas de bloc date show : on le cache
         const dates = document.querySelector('.accueil .dates');
         if (dates) dates.style.display = 'none';
         // Affiche le bloc candidature (nom/email/date souhaitée)
         document.getElementById('bloc-candidature').style.display = 'block';
-        // Pré-remplir signature_nom au fil de la frappe nom_artiste_cand
+        // Synchroniser nom_artiste_cand → accueil (« Salut X 🐝 ») + signature
         document.addEventListener('input', (e) => {
           if (e.target && e.target.id === 'nom_artiste_cand') {
+            const v = e.target.value.trim();
+            const accueil = document.getElementById('nom-artiste-accueil');
+            if (accueil) accueil.textContent = v || '…';
             const sn = document.getElementById('signature_nom');
-            if (sn && !sn.value) sn.value = e.target.value;
+            if (sn && !sn.value) sn.value = v;
             majRecapSignature();
           }
         });
