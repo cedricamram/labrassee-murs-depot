@@ -726,9 +726,10 @@
         document.getElementById('app-erreur-token').style.display = 'flex';
         return;
       }
-      const { data, error } = await supa
-        .from('artistes_murs').select('*').eq('token_depot', token).maybeSingle();
-      if (error || !data) {
+      // Lecture via RPC token-gated (get_dossier_murs). La table n'expose plus
+      // les PII ni le token en lecture anon (RLS + GRANT colonnes vitrine).
+      const { data, error } = await supa.rpc('get_dossier_murs', { p_token: token });
+      if (error || !data || !data.id) {
         console.error('Erreur chargement artiste:', error);
         chargement.style.display = 'none';
         document.getElementById('app-erreur-token').style.display = 'flex';
@@ -935,21 +936,16 @@
         const dateCand = document.getElementById('date_souhaitee_cand').value.trim();
         const datePrincipale = document.getElementById('date_install_select').value || null;
         const dateSecondaire = document.getElementById('date_install_select_2').value || null;
-        const slug = nomCand.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-        const rand = Math.random().toString(36).slice(2, 8);
-        const token = `surnosmurs-${slug || 'candidat'}-${rand}`;
-        const { data: nouveau, error: errIns } = await supa
-          .from('artistes_murs')
-          .insert({
+        // Création via RPC : token_depot généré côté serveur, statut forcé à « candidature ».
+        const { data: nouveau, error: errIns } = await supa.rpc('creer_candidature_murs', {
+          p_payload: {
             nom_artiste: nomCand,
             courriel: mailCand,
-            token_depot: token,
             date_install_proposee: datePrincipale,
             date_install_proposee_secondaire: dateSecondaire,
             recurrence_notes: dateCand ? `Notes disponibilité : ${dateCand}` : null,
-          })
-          .select()
-          .single();
+          },
+        });
         if (errIns) throw errIns;
         artiste = nouveau;
       }
@@ -1006,8 +1002,10 @@
       update.signature_le = new Date().toISOString();
       update.statut = modeCandidature ? 'candidature_complete' : 'depot_complet';
 
-      const { error: errMaj } = await supa
-        .from('artistes_murs').update(update).eq('token_depot', artiste.token_depot);
+      const { error: errMaj } = await supa.rpc('maj_dossier_murs', {
+        p_token: artiste.token_depot,
+        p_payload: update,
+      });
       if (errMaj) throw errMaj;
 
       avancerProgress(barre, 100);
