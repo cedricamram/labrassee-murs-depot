@@ -357,7 +357,7 @@
 <main class="container">
 
   <div class="accueil">
-    <h2 id="accueil-titre">Salut <span id="nom-artiste-accueil">…</span> 🐝</h2>
+    <h2 id="accueil-titre">Salut <span id="nom-artiste-accueil">…</span></h2>
     <p id="accueil-p1">Cet espace privé te permet de déposer tout ce dont on a besoin pour ton expo à La Brassée : ta bio, ton univers (photos d'œuvres HD, technique, dimensions), tes liens et la signature des conditions.</p>
     <p id="accueil-p2">Tu peux remplir en plusieurs fois. Quand tu cliques « Envoyer », tout part vers Cédric et Joshué.</p>
     <p style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(247,209,53,0.2);font-size:14px;color:rgba(255,255,255,0.75)">🖼️ <strong style="color:var(--jaune);font-weight:500">4 semaines d'expo</strong> · installation un dimanche matin · <strong style="color:var(--jaune)">vernissage 5 à 7 le dimanche suivant</strong> (présence artiste obligatoire) · décrochage le dimanche matin 4 semaines après.</p>
@@ -683,7 +683,7 @@
         modeCandidature = true;
         chargement.style.display = 'none';
         document.getElementById('app-charge').style.display = 'block';
-        document.getElementById('accueil-titre').innerHTML = 'Salut <span id="nom-artiste-accueil">…</span> 🐝';
+        document.getElementById('accueil-titre').innerHTML = 'Salut <span id="nom-artiste-accueil">…</span>';
         document.getElementById('accueil-p1').innerHTML = "<strong style=\"color:var(--jaune)\">Tu veux exposer sur nos murs ?</strong> Remplis ce formulaire — c'est ton premier filtre. Plus on voit ton univers (photos d'œuvres, technique, bio), plus on a envie de t'accrocher.";
         document.getElementById('accueil-p2').textContent = "Cédric et Joshué te reviennent rapidement pour caler ton créneau sur la prochaine rotation 4 semaines libre.";
         // Pas de bloc date show : on le cache
@@ -708,7 +708,7 @@
           const sel = document.getElementById('date_install_select');
           if (sel) sel.innerHTML = '<option value="" disabled selected>⚠️ Impossible de charger les dates — recharge la page</option>';
         }
-        // Synchroniser nom_artiste_cand → accueil (« Salut X 🐝 ») + signature
+        // Synchroniser nom_artiste_cand → accueil (« Salut X ») + signature
         document.addEventListener('input', (e) => {
           if (e.target && e.target.id === 'nom_artiste_cand') {
             const v = e.target.value.trim();
