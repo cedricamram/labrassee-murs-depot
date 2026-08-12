@@ -463,6 +463,10 @@
           </div>
         </div>
       </div>
+      <div>
+        <label for="credit_photo">📸 Crédit photo <span class="opt">(si tes photos ont été prises par un·e photographe)</span></label>
+        <input type="text" id="credit_photo" placeholder="Ex : Marie Tremblay · mariephoto.com">
+      </div>
     </fieldset>
 
     <fieldset>
@@ -772,7 +776,7 @@
       }
 
       // Préremplir les champs
-      const champs = ['bio','titre_expo','technique','dimensions_notes','cellulaire','instagram','facebook','site_web','signature_nom'];
+      const champs = ['bio','titre_expo','technique','dimensions_notes','cellulaire','instagram','facebook','site_web','signature_nom','credit_photo'];
       champs.forEach(c => {
         const el = document.getElementById(c);
         if (el && artiste[c]) el.value = artiste[c];
@@ -982,7 +986,7 @@
       }
       avancerProgress(barre, 75);
 
-      const champs = ['bio','titre_expo','technique','dimensions_notes','cellulaire','instagram','facebook','site_web'];
+      const champs = ['bio','titre_expo','technique','dimensions_notes','cellulaire','instagram','facebook','site_web','credit_photo'];
       // Mêmes règles de sanitization URL que côté Surlascène : si saisie pas
       // une URL valide → null, ça évite les crashs admin (cf. Domlebo 2026-05-20).
       const champsUrlStricts = new Set(['site_web','facebook']);
