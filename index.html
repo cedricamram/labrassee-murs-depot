@@ -407,7 +407,7 @@
       <select id="date_install_select" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#f1efe4;font-size:16px;font-family:Lato,sans-serif">
         <option value="" disabled selected>— Chargement des dimanches libres —</option>
       </select>
-      <p style="color:rgba(255,255,255,0.55);font-size:12px;margin:6px 0 0">Accrochage le matin (~10h), vernissage le 5à7 du même dimanche. Décrochage 4 semaines plus tard, le dimanche matin avant la pose suivante.</p>
+      <p style="color:rgba(255,255,255,0.55);font-size:12px;margin:6px 0 0">Accrochage le matin (~10h), vernissage en 5 à 7 le dimanche suivant. Décrochage 4 semaines plus tard, le dimanche matin avant la pose suivante.</p>
 
       <label for="date_install_select_2" style="margin-top:14px">Dimanche d'accrochage secondaire *
         <span class="opt">(au cas où le principal ne marche pas — obligatoire, évite les allers-retours)</span></label>
@@ -700,7 +700,7 @@
         document.getElementById('app-charge').style.display = 'block';
         document.getElementById('accueil-titre').innerHTML = 'Salut <span id="nom-artiste-accueil">…</span>';
         document.getElementById('accueil-p1').innerHTML = "<strong style=\"color:var(--jaune)\">Tu veux exposer sur nos murs ?</strong> Remplis ce formulaire — c'est ton premier filtre. Plus on voit ton univers (photos d'œuvres, technique, bio), plus on a envie de t'accrocher.";
-        document.getElementById('accueil-p2').textContent = "Cédric et Joshué te reviennent rapidement pour caler ton créneau sur la prochaine rotation 4 semaines libre.";
+        document.getElementById('accueil-p2').textContent = "Cédric te revient rapidement pour caler ton créneau sur la prochaine rotation 4 semaines libre.";
         // Pas de bloc date show : on le cache
         const dates = document.querySelector('.accueil .dates');
         if (dates) dates.style.display = 'none';
@@ -1026,7 +1026,7 @@
       avancerProgress(barre, 100);
 
       const messageSucces = modeCandidature
-        ? `Merci ${artiste.nom_artiste}. Ta candidature est arrivée chez Cédric et Joshué. Ils te reviennent rapidement avec une date proposée. Garde précieusement ce lien personnel pour ajuster ton dossier plus tard : <code style="display:block;margin-top:10px;background:rgba(247,209,53,0.1);padding:8px;border-radius:6px;font-size:12px;word-break:break-all">${window.location.origin}/?t=${artiste.token_depot}</code>`
+        ? `Merci ${artiste.nom_artiste}. Ta candidature est arrivée chez Cédric. On te revient rapidement avec une date proposée. Garde précieusement ce lien personnel pour ajuster ton dossier plus tard : <code style="display:block;margin-top:10px;background:rgba(247,209,53,0.1);padding:8px;border-radius:6px;font-size:12px;word-break:break-all">${window.location.origin}/?t=${artiste.token_depot}</code>`
         : `Merci ${artiste.nom_artiste}. Cédric te reviendra rapidement. Tu peux fermer cette fenêtre, ou revenir plus tard pour ajouter d'autres photos ou ajuster ton rider.`;
       afficherMessage('succes', '✓ Tout est arrivé à La Brassée', messageSucces);
       bouton.textContent = 'Envoyé ✓';
