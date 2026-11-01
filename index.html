@@ -583,8 +583,9 @@
   const photosHD = [];
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Sélection des dimanches d'accrochage (rotation 4 sem)
-  // Aligné sur la logique `dimAncres` de labrassee-cms/src/frontend/lib/dates-libres.ts
+  // Sélection des dimanches d'accrochage : lus en base (artistes_murs), dimanches pris retirés
+  // (dossier Dionysos 01/11/2026, points 1 et 2 ; l'ancien cycle venait de `dimAncres`
+  // dans labrassee-cms/src/frontend/lib/dates-libres.ts)
   // ─────────────────────────────────────────────────────────────────────────
   const JOURS_LONG_MURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
   const MOIS_LONG_MURS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -606,43 +607,65 @@
     return `Dim. ${jour} ${MOIS_LONG_MURS[mois]} ${annee}`;
   }
 
+  // Statuts qui NE retiennent PAS un dimanche (dossier mort ou fondu dans un autre).
+  // Tout autre statut (candidature_complete, depot_complet, confirme, …) occupe ses dimanches.
+  const STATUTS_MURS_INACTIFS = new Set(['refuse','annule','retire','fusionne','doublon','archive']);
+
   async function fetchExposExistantes() {
-    // Récupère toutes les expos avec date_decrochage non null (pour calculer l'ancre)
+    // Dossiers murs dont l'expo n'est pas finie (ou sans décrochage posé).
+    // ⚠️ Ne lire QUE des colonnes ouvertes à la clé publique : une seule colonne
+    // refusée (ex. signature_acceptee → 42501) fait échouer toute la requête,
+    // et le formulaire retombait alors sur un cycle calculé depuis aujourd'hui,
+    // qui proposait des dimanches déjà pris (dossier Dionysos 01/11/2026, point 1).
     const today = todayMtlISOMurs();
-    const url = `${SUPABASE_URL}/rest/v1/artistes_murs?select=date_install,date_decrochage,signature_acceptee,statut&date_decrochage=not.is.null&date_decrochage=gte.${today}&limit=200`;
+    const url = `${SUPABASE_URL}/rest/v1/artistes_murs?select=date_install,date_decrochage,statut&date_install=not.is.null&or=(date_decrochage.gte.${today},date_decrochage.is.null)&limit=500`;
     const res = await fetch(url, {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
     });
-    if (!res.ok) return [];
-    return await res.json();
+    // Échec = on ne propose RIEN plutôt que des dimanches peut-être pris.
+    if (!res.ok) throw new Error('Supabase HTTP ' + res.status);
+    const rows = await res.json();
+    return rows.filter(e => !STATUTS_MURS_INACTIFS.has(String(e.statut || '').toLowerCase()));
+  }
+
+  function isoPlusJours(iso, jours) {
+    const d = new Date(iso + 'T00:00:00');
+    d.setDate(d.getDate() + jours);
+    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), j = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${j}`;
   }
 
   function calculerAncresAccrochage(expos) {
-    // Ancre 0 = max(date_decrochage) parmi les expos existantes, ou premier dim >= today+7j si vide
+    // Les dimanches d'accrochage se LISENT en base (point 2) : un créneau s'ouvre le
+    // dimanche où une expo active se décroche, si aucune autre ne s'accroche ce jour-là
+    // (trou dans la chaîne). Après la dernière expo, on prolonge la cadence de 4 semaines.
+    // Puis on retire tout dimanche qui tombe dans une expo active : install ≤ dimanche < décrochage
+    // (le dimanche du décrochage reste libre : décrochage le matin, pose suivante juste après).
     const today = todayMtlISOMurs();
-    let pivot;
-    if (expos && expos.length > 0) {
-      let maxDecrochage = '';
-      for (const e of expos) {
-        if (e.date_decrochage && e.date_decrochage > maxDecrochage) maxDecrochage = e.date_decrochage;
-      }
-      if (maxDecrochage) {
-        pivot = new Date(maxDecrochage + 'T00:00:00');
-      }
+    const minDate = isoPlusJours(today, 7);              // préavis d'une semaine
+    const occupee = (iso) => expos.some(e => {
+      const fin = e.date_decrochage || isoPlusJours(e.date_install, 28);
+      return e.date_install <= iso && iso < fin;
+    });
+    const estDimanche = (iso) => new Date(iso + 'T00:00:00').getDay() === 0;
+
+    const candidats = new Set();
+    let finChaine = '';
+    for (const e of expos) {
+      const fin = e.date_decrochage || isoPlusJours(e.date_install, 28);
+      if (fin > finChaine) finChaine = fin;
+      if (e.date_decrochage && estDimanche(e.date_decrochage)) candidats.add(e.date_decrochage);
     }
-    if (!pivot) {
-      pivot = new Date(today + 'T00:00:00');
-      pivot.setDate(pivot.getDate() + 7);
-      while (pivot.getDay() !== 0) pivot.setDate(pivot.getDate() + 1);
-    }
-    // Générer 12 ancres (∼1 an d'horizon, rotation 4 sem = 28 jours)
-    const ancres = [];
-    const cur = new Date(pivot);
-    for (let i = 0; i < 12; i++) {
-      ancres.push(cur.toISOString().slice(0, 10));
-      cur.setDate(cur.getDate() + 28);
-    }
-    return ancres;
+    // Pivot de la cadence : le dernier décrochage, ou le premier dimanche ≥ aujourd'hui + 7 j.
+    let pivot = finChaine && finChaine >= minDate ? finChaine : minDate;
+    while (!estDimanche(pivot)) pivot = isoPlusJours(pivot, 1);
+    // Horizon ~1 an, mais toujours au moins 2 dimanches après la dernière expo (principal + secondaire).
+    const horizon = [isoPlusJours(today, 365), isoPlusJours(pivot, 28)].sort().pop();
+    for (let cur = pivot; cur <= horizon; cur = isoPlusJours(cur, 28)) candidats.add(cur);
+
+    return Array.from(candidats)
+      .filter(iso => iso >= minDate && iso <= horizon && !occupee(iso))
+      .sort();
   }
 
   async function peuplerSelectsDatesAccrochage() {
@@ -720,8 +743,10 @@
           }
         } catch (err) {
           console.error('Erreur peuplerSelectsDatesAccrochage:', err);
-          const sel = document.getElementById('date_install_select');
-          if (sel) sel.innerHTML = '<option value="" disabled selected>⚠️ Impossible de charger les dates — recharge la page</option>';
+          for (const id of ['date_install_select', 'date_install_select_2']) {
+            const sel = document.getElementById(id);
+            if (sel) sel.innerHTML = '<option value="" disabled selected>⚠️ Impossible de charger les dates — recharge la page</option>';
+          }
         }
         // Synchroniser nom_artiste_cand → accueil (« Salut X ») + signature
         document.addEventListener('input', (e) => {
