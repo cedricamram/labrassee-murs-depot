@@ -546,7 +546,7 @@
   <div class="logo-svg-footer" id="logo-footer"></div>
   <div class="nom-marque">LA BRASSÉE</div>
   <div>Café · scène · galerie · Rosemont, Montréal</div>
-  <div style="margin-top:8px">Une question ? <a href="mailto:contact@labrassee.cafe">contact@labrassee.cafe</a></div>
+  <div style="margin-top:8px">Une question ? <a href="mailto:surnosmurs@labrassee.com">surnosmurs@labrassee.com</a></div>
 </footer>
 
 </div>
@@ -554,7 +554,7 @@
 <div id="app-erreur-token" class="ecran-token-invalide" style="display:none">
   <h2>Ce lien n'est pas valide</h2>
   <p>Ton lien semble incomplet ou expiré. Écris à Cédric pour qu'il t'en renvoie un.</p>
-  <a href="mailto:contact@labrassee.cafe">contact@labrassee.cafe</a>
+  <a href="mailto:surnosmurs@labrassee.com">surnosmurs@labrassee.com</a>
 </div>
 
 <script>
@@ -675,7 +675,7 @@
     const selS = document.getElementById('date_install_select_2');
     if (!selP || !selS) return;
     if (ancres.length === 0) {
-      selP.innerHTML = '<option value="" disabled selected>Aucune ancre dispo — écris à contact@labrassee.cafe</option>';
+      selP.innerHTML = '<option value="" disabled selected>Aucune ancre dispo — écris à surnosmurs@labrassee.com</option>';
       selS.innerHTML = '<option value="" disabled selected>Aucune ancre dispo —</option>';
       return;
     }
@@ -809,7 +809,7 @@
       if (artiste.signature_acceptee) document.getElementById('signature_check').checked = true;
     } catch (err) {
       console.error('Erreur init():', err);
-      chargement.innerHTML = '<div style="color:#ff6b6b;padding:24px;text-align:center;font-family:Lato,sans-serif;max-width:500px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#f7d135;margin-bottom:12px">Une erreur est survenue</div>' + (err.message || err) + '<br><br>Vérifie ta connexion et recharge la page. Si le problème persiste, écris à <a href="mailto:contact@labrassee.cafe" style="color:#f7d135">contact@labrassee.cafe</a>.</div>';
+      chargement.innerHTML = '<div style="color:#ff6b6b;padding:24px;text-align:center;font-family:Lato,sans-serif;max-width:500px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#f7d135;margin-bottom:12px">Une erreur est survenue</div>' + (err.message || err) + '<br><br>Vérifie ta connexion et recharge la page. Si le problème persiste, écris à <a href="mailto:surnosmurs@labrassee.com" style="color:#f7d135">surnosmurs@labrassee.com</a>.</div>';
     }
   }
 
@@ -1061,7 +1061,7 @@
       apercuArtiste.style.display = 'none';
     } catch (err) {
       console.error(err);
-      afficherMessage('erreur', 'Un problème est survenu', `${err.message || err}. Réessaye dans un instant, ou écris à contact@labrassee.cafe.`);
+      afficherMessage('erreur', 'Un problème est survenu', `${err.message || err}. Réessaye dans un instant, ou écris à surnosmurs@labrassee.com.`);
       bouton.disabled = false;
       bouton.textContent = "Réessayer l'envoi";
       progress.classList.remove('actif');
